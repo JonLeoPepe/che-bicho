@@ -192,7 +192,7 @@ button.mate { cursor: pointer; border-color: #f2b03a; border-width: 2.6px; }
 .chirola { display: inline-block; width: 20px; height: 20px; vertical-align: middle; }
 .chirola svg { width: 20px; height: 20px; display: block; }
 .interior { overflow: hidden; border-bottom: 2.4px solid var(--o); }
-.interior svg { width: 360px; height: 190px; display: block; }
+.interior svg { width: 360px; height: 180px; display: block; }
 .saludo-negocio { position: absolute; margin: 0; background: #f4ead2; border: 2px solid var(--o); border-radius: 12px; padding: 7px 10px; font: 800 12.5px Nunito, sans-serif; }
 .saludo-negocio b { font-family: Bree, serif; font-weight: 400; color: #7a4a2a; }
 .lista-tienda { position: absolute; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-bottom: 10px; }

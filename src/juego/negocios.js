@@ -31,7 +31,7 @@ function hoja(app, { tipo, prov, quien, dib, saludo, secciones, extra }) {
   p.append(h('div', { class: 'fondo', html: fondoCuero() }));
   const plata = h('span', { class: 'plata' }, chirola(), h('b', {}, mil(P.chirolas)));
   p.append(en(h('header', { class: 'cabecera cabecera-clara' }, h('button', { class: 'volver volver-claro', type: 'button', 'aria-label': 'Volver', onclick: () => app.volver(), html: '<span><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="17" fill="#7a4a2a" stroke="#2a1c15" stroke-width="2"/><path d="M22,10 L13,18 L22,26" stroke="#fbf3e2" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' }), h('h1', {}, TITULO[tipo] || tipo), plata), 0, 0, 360));
-  if (interior) p.append(en(h('div', { class: 'interior', html: interior }), 0, 56, 360, 190));
+  if (interior) p.append(en(h('div', { class: 'interior', html: interior }), 0, 66, 360, 180));
   const saludoEl = en(h('p', { class: 'saludo-negocio' }, h('b', {}, quien), ' ', saludo), 12, interior ? 252 : 64, 336);
   p.append(saludoEl);
   const lista = en(h('div', { class: 'lista-tienda' }), 12, interior ? 292 : 104, 336, interior ? 456 : 644);
