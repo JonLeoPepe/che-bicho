@@ -90,7 +90,7 @@ export const enCorral = (P) => P.bichos.filter((b) => !P.equipo.includes(b.id));
 /** Bicho de combate a partir de uno propio, con la vida que le queda. */
 export function paraCombate(b) {
   const c = crearBicho(b.familia, { nivel: b.nivel, camino: b.camino, pasiva: b.pasiva, prenda: b.prenda });
-  c.propio = b.id; c.hp = Math.max(0, Math.round(c.hpmax * b.vida)); c.nombre = especie(b); c.apodo = b.apodo;
+  c.propio = b.id; c.hp = b.vida >= 1 ? c.hpmax : Math.max(0, Math.min(c.hpmax, Math.round(c.hpmax * b.vida))); c.nombre = especie(b); c.apodo = b.apodo;
   return c;
 }
 export const curarTodos = (P) => { for (const b of P.bichos) b.vida = 1; };
@@ -113,9 +113,9 @@ export function atrapar(P, familia, nivel, camino, zonaNombre) {
 }
 
 // ---------- libreta ----------
-export function marcarVisto(P, familia, zonaNombre) { if (!P.libreta.vistos[familia]) P.libreta.vistos[familia] = zonaNombre; }
+export function marcarVisto(P, familia, zonaNombre, nombre = familia) { if (!P.libreta.vistos[familia]) P.libreta.vistos[familia] = zonaNombre; (P.libreta.formasVistas ??= {})[nombre] = true; }
 export function marcarAtrapado(P, familia, camino, zonaNombre) {
-  marcarVisto(P, familia, zonaNombre);
+  marcarVisto(P, familia, zonaNombre, camino ? FAMILIAS[familia].caminos[camino - 1] : familia);
   if (!P.libreta.atrapados[familia]) P.libreta.atrapados[familia] = { dia: dia(P.reloj), zona: zonaNombre };
   const F = FAMILIAS[familia];
   P.libreta.formas[camino ? F.caminos[camino - 1] : F.base] = true;

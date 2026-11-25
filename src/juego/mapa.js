@@ -45,9 +45,10 @@ export function mapa(app) {
   const capaCosas = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   capaCosas.setAttribute('viewBox', '0 0 360 760'); capaCosas.setAttribute('class', 'fondo-svg cosas');
   const capaClima = h('div', { class: 'fondo clima' });
+  const capaSuelo = h('div', { class: 'fondo clima' });
   const hud = h('div', { class: 'fondo hud' });
   const toques = h('div', { class: 'toques-mapa' });
-  p.append(fondo, capaCosas, capaClima, hud, toques);
+  p.append(fondo, capaSuelo, capaCosas, capaClima, hud, toques);
 
   const extra = (EXTRA[clave] || []);
   const edificios = [...M.cosas.filter((c) => c.que === 'edificio'), ...extra].map((e) => ({ ...e, negocio: NEGOCIOS[`${clave}:${e.quien}`] || NEGOCIOS[e.quien] || null }));
@@ -66,7 +67,7 @@ export function mapa(app) {
   const bloq = new Uint8Array(cols * filas);
   const marcar = (x0, y0, x1, y1) => { for (let cy = Math.max(0, Math.floor(y0 / CEL)); cy <= Math.min(filas - 1, Math.floor(y1 / CEL)); cy++) for (let cx = Math.max(0, Math.floor(x0 / CEL)); cx <= Math.min(cols - 1, Math.floor(x1 / CEL)); cx++) bloq[cy * cols + cx] = 1; };
   for (const e of edificios) if (e.caja) { const [x, y, w, hh] = e.caja; marcar(x - 4, y - 2, x + w + 4, y + hh + 6); }
-  for (const g of gente) { const [fx, fy] = pies(g); marcar(fx - 12, fy - 10, fx + 12, fy + 6); }
+  for (const g of gente) { const [fx, fy] = pies(g); marcar(fx - 32, fy - 58, fx + 32, fy + 60); if (g.fogon) marcar(g.fogon[0] - 24, g.fogon[1] - 10, g.fogon[0] + 24, g.fogon[1] + 62); }
   const libre = (x, y) => x >= LIM.x0 && x <= LIM.x1 && y >= LIM.y0 && y <= LIM.y1 && !bloq[Math.floor(y / CEL) * cols + Math.floor(x / CEL)];
   function masCercaLibre(x, y) {
     if (libre(x, y)) return [x, y];
@@ -113,19 +114,24 @@ export function mapa(app) {
   const reciente = memoria.clave === clave && Date.now() < memoria.hasta;
   let salvajes = reciente ? memoria.salvajes.filter((s) => !s.fuera) : [];
   const vistos = reciente ? memoria.vistos : new Set();
-  let agua = null;
-  (async function mascaraAgua() {
+  // hábitat: el color del suelo donde los lotes aprobados pusieron a cada bicho
+  let pix = null;
+  (async function muestrearSuelo() {
     try {
       const img = new Image(); const svgTxt = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 760" width="90" height="190">${M.svg}</svg>`;
       img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgTxt)}`;
       await img.decode();
       const c = document.createElement('canvas'); c.width = 90; c.height = 190; const x = c.getContext('2d'); x.drawImage(img, 0, 0, 90, 190);
-      const d = x.getImageData(0, 0, 90, 190).data; agua = new Uint8Array(90 * 190);
-      for (let i = 0; i < agua.length; i++) { const r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2]; agua[i] = b > 110 && b > r + 25 && b >= g - 6 ? 1 : 0; }
-    } catch { agua = null; }
+      pix = x.getImageData(0, 0, 90, 190).data;
+    } catch { pix = null; }
   })();
-  const esAgua = (x, y) => (agua ? agua[Math.floor(y / 4) * 90 + Math.floor(x / 4)] === 1 : false);
-
+  const colorEn = (x, y) => { if (!pix) return null; const i = (Math.max(0, Math.min(189, Math.floor(y / 4))) * 90 + Math.max(0, Math.min(89, Math.floor(x / 4)))) * 4; return [pix[i], pix[i + 1], pix[i + 2]]; };
+  const parecido = (a, b) => a && b && Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) < 60;
+  const azul = (c) => c && c[2] > 110 && c[2] > c[0] + 25 && c[2] >= c[1] - 6;
+  const sinTilde = (t) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const lugarCatalogo = (fam) => M.cosas.find((k) => k.que === 'bicho' && k.quien && sinTilde(k.quien) === sinTilde(fam));
+  const pieDe = (c) => [c.x + 100 * (c.s || 0.42), c.y + 180 * (c.s || 0.42)];
+  const refAgua = () => M.cosas.filter((k) => k.que === 'bicho' && FAMILIAS[Object.keys(FAMILIAS).find((f) => sinTilde(f) === sinTilde(k.quien || ''))]?.tipo === 'Agua').map((k) => colorEn(...pieDe(k)));
   function climaAhora() { return Z.interior ? null : climaZona(climaDe(P.semilla, prov, dia(P.reloj), momento(P.reloj)), Z); }
   function candidatos() {
     const mom = momento(P.reloj), cli = climaAhora();
@@ -150,18 +156,25 @@ export function mapa(app) {
   }
   function lugarPara(fam, s) {
     const F = FAMILIAS[fam]; const lado = 200 * s;
-    const c = M.cosas.find((k) => k.que === 'bicho' && k.quien && k.quien.toLowerCase() === fam.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''));
-    for (let t = 0; t < 60; t++) {
+    const c = lugarCatalogo(fam);
+    const ref = c ? colorEn(...pieDe(c)) : null;
+    const aguas = refAgua();
+    const esAgua = (col) => azul(col) || aguas.some((r) => parecido(col, r));
+    for (let t = 0; t < 80; t++) {
       let x, y;
-      if (c && t < 12) { x = c.x + (rng.sig() - 0.5) * 60; y = c.y + (rng.sig() - 0.5) * 60; }
-      else { x = LIM.x0 + rng.sig() * (LIM.x1 - LIM.x0 - lado); y = LIM.y0 - lado * 0.5 + rng.sig() * (LIM.y1 - LIM.y0 - lado * 0.3); }
+      if (c && (t < 10 || !pix)) { x = c.x + (rng.sig() - 0.5) * 70; y = c.y + (rng.sig() - 0.5) * 70; }
+      else { x = LIM.x0 + rng.sig() * (LIM.x1 - LIM.x0 - lado); y = 76 - lado * 0.15 + rng.sig() * (LIM.y1 - lado * 0.9 - 76); }
+      y = Math.max(76 - lado * 0.15, Math.min(LIM.y1 - lado * 0.9, y));
       const fx = x + lado / 2, fy = y + lado * 0.9;
-      if (!libre(fx, fy)) continue;
-      if (Math.hypot(fx - jug.x, fy - jug.y) < 110) continue;
+      if (!libre(fx, fy) && F.tipo !== 'Agua') continue;
+      if (Math.hypot(fx - jug.x, fy - jug.y) < 170) continue;
       if (choca(x, y, lado)) continue;
-      const enAgua = esAgua(fx, fy - lado * 0.2);
-      if (agua && F.tipo === 'Agua' && !enAgua && t < 40) continue;
-      if (agua && F.tipo !== 'Agua' && enAgua) continue;
+      const col = colorEn(fx, fy - lado * 0.2);
+      if (pix && t < 70) {
+        if (ref && !parecido(col, ref)) continue;
+        if (!ref && F.tipo === 'Agua' && !esAgua(col)) continue;
+        if (!ref && F.tipo !== 'Agua' && esAgua(col)) continue;
+      }
       return [x, y];
     }
     return null;
@@ -183,7 +196,8 @@ export function mapa(app) {
     const camino = nivel >= 4 && !F.mito ? 1 + Math.floor(rng.sig() * 2) : 0;
     const s = elegido.rareza === 'mito' ? 0.5 : 0.42;
     const pos = lugarPara(elegido.familia, s); if (!pos) return;
-    salvajes.push({ id: rng.sig(), familia: elegido.familia, rareza: elegido.rareza, caracter: F.mito ? 'mito' : (CARACTER[elegido.familia] || 'curioso'), nivel, camino, x: pos[0], y: pos[1], s, flip: rng.sig() < 0.5, t: 0, nuevo: true });
+    const col = colorEn(pos[0] + 100 * s, pos[1] + 180 * s - 40 * s);
+    salvajes.push({ col, id: rng.sig(), familia: elegido.familia, rareza: elegido.rareza, caracter: F.mito ? 'mito' : (CARACTER[elegido.familia] || 'curioso'), nivel, camino, x: pos[0], y: pos[1], s, flip: rng.sig() < 0.5, t: 0, nuevo: true });
     dibujarCosas();
   }
 
@@ -233,6 +247,12 @@ export function mapa(app) {
     if (m === 'noche') s += '<rect width="360" height="760" fill="#0a1430" opacity=".36"/>';
     if (m === 'tarde') s += '<rect width="360" height="760" fill="#f2a03a" opacity=".07"/>';
     if (c && CLIMA_MAPA[c]) s += CLIMA_MAPA[c];
+    // charcos y manchas de nieve del lote 15a, sin pisar edificios ni gente
+    const sobreAlgo = (x, y, r) => edificios.some((e) => e.caja && x + r > e.caja[0] && x - r < e.caja[0] + e.caja[2] && y + 8 > e.caja[1] && y - 8 < e.caja[1] + e.caja[3]) || gente.some((g) => Math.abs(g.x + 18 - x) < r + 18 && Math.abs(g.y + 64 - y) < 14);
+    let suelo = '';
+    if (c === 'lluvia') suelo = `<g fill="#8ab4c8" opacity=".75" stroke="#6a94a8" stroke-width="1.2">${[[120, 470], [210, 430], [70, 560], [260, 360]].filter(([x, y]) => !sobreAlgo(x, y, 18)).map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="18" ry="6"/>`).join('')}</g>`;
+    if (c === 'nieve') suelo = `<g fill="#fff" opacity=".85">${[[190, 250, 40], [140, 330, 30], [120, 660, 32], [40, 610, 26], [320, 430, 26]].filter(([x, y, r]) => !sobreAlgo(x, y, r)).map(([x, y, r]) => `<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r * 0.4}"/>`).join('')}</g>`;
+    capaSuelo.innerHTML = `<svg viewBox="0 0 360 760" xmlns="http://www.w3.org/2000/svg" class="fondo-svg">${suelo}</svg>`;
     capaClima.innerHTML = `<svg viewBox="0 0 360 760" xmlns="http://www.w3.org/2000/svg" class="fondo-svg">${s}</svg>`;
   }
 
@@ -292,7 +312,7 @@ export function mapa(app) {
     if (q.equipo !== undefined) return app.ir('bichos');
     if (q.carta) return app.ir('carta');
     if (q.bicho) return irA(q.bicho.x + 100 * q.bicho.s, q.bicho.y + 180 * q.bicho.s, { bicho: q.bicho });
-    if (q.persona) { const [fx, fy] = pies(q.persona); return irA(fx + (jug.x < fx ? -22 : 22), fy + 6, { persona: q.persona }); }
+    if (q.persona) { const [fx, fy] = pies(q.persona); return irA(fx + (jug.x < fx ? -40 : 40), fy, { persona: q.persona }); }
     if (q.edificio) { const [ex, ey, w, hh] = q.edificio.caja; return irA(ex + w / 2, ey + hh + 12, { edificio: q.edificio }); }
     // salir por un borde
     const lado = y < LIM.y0 + 14 ? 'arriba' : y > LIM.y1 - 6 ? 'abajo' : x < LIM.x0 + 14 ? 'izquierda' : x > LIM.x1 - 14 ? 'derecha' : null;
@@ -418,11 +438,12 @@ export function mapa(app) {
       let vx = 0, vy = 0, v = 0;
       if (s.caracter === 'timido' && d < 90) { vx = fx - jug.x; vy = fy - jug.y; v = 52; }
       else if (s.caracter === 'curioso' && d < 170 && d > 52) { vx = jug.x - fx; vy = jug.y - fy; v = 26; }
-      else if (s.caracter === 'bravo' && d < 130) { vx = jug.x - fx; vy = jug.y - fy; v = 70; }
+      else if (s.caracter === 'bravo' && d < 120 && s.t > 2) { vx = jug.x - fx; vy = jug.y - fy; v = 70; }
       else if (s.caracter !== 'mito') { vx = Math.cos(s.t * 0.7 + s.id * 9); vy = Math.sin(s.t * 0.5 + s.id * 5); v = 7; }
       if (!v) continue;
       const n = Math.hypot(vx, vy) || 1; const nx = s.x + vx / n * v * dt, ny = s.y + vy / n * v * dt;
-      if (libre(nx + lado / 2, ny + lado * 0.9) && !choca(nx, ny, lado, s)) { s.x = nx; s.y = ny; }
+      const mismoSuelo = !s.col || parecido(colorEn(nx + lado / 2, ny + lado * 0.9 - lado * 0.2), s.col);
+      if ((libre(nx + lado / 2, ny + lado * 0.9) || FAMILIAS[s.familia].tipo === 'Agua') && mismoSuelo && !choca(nx, ny, lado, s) && ny > 76 - lado * 0.15 && ny + lado * 0.9 < LIM.y1) { s.x = nx; s.y = ny; }
       if (vx) s.flip = vx < 0;
       if (s.caracter === 'bravo' && d < 34) { encuentro(s); return; }
     }
@@ -437,7 +458,7 @@ export function mapa(app) {
   }
 
   // ---------- arranque ----------
-  musica(prov);
+  musica('salta');
   for (const id of Object.keys(CHANGUEROS)) actualizarOferta(P, id);
   cargarBichos().then(() => { if (!salvajes.length) { aparecer(); aparecer(); } dibujarCosas(); pintarHud(); });
   pintarClima(); pintarHud(); dibujarCosas();
@@ -452,10 +473,12 @@ export function mapa(app) {
       await dialogo(p, { quien: nom, dibujo: PERSONAS[dib] || '', lineas: der, detalle: 'No perdiste chirolas.' });
       ocupado = false;
     }
+    const charlas = app.temporal.charlas || []; app.temporal.charlas = [];
+    if (charlas.length) { ocupado = true; for (const c of charlas) await dialogo(p, { quien: c.quien, dibujo: PERSONAS[c.dibujo] || ADULTOS[c.dibujo] || '', lineas: c.lineas }); ocupado = false; }
     for (const t of av) await avisoMapa(p, t);
   })();
   void SALUDOS; void trato;
-  p.__debug = { salvajes: () => salvajes, jug, gente, edificios, P };
+  p.__debug = { salvajes: () => salvajes, jug, gente, edificios, P, recargar: () => { vivo = false; app.base('mapa'); } };
   p.foco = toques;
   return p;
 }

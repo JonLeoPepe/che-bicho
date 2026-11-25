@@ -61,7 +61,8 @@ export function libreta(app) {
         const formas = [F.base, ...F.caminos];
         const fila = h('button', { class: 'fila-libreta', type: 'button' }, ...formas.map((n) => {
           const tiene = P.libreta.formas[n];
-          return h('span', { class: `forma ${tiene ? 'tiene' : visto ? 'visto' : 'sin'}`, html: dibujo(arteBicho(n), '0 0 200 200') + (tiene ? '<svg class="tilde" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="#2f7d5b"/><path d="M5,10 L9,14 L15,6" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg>' : '') });
+          const vista = n === F.base ? visto : P.libreta.formasVistas?.[n];
+          return h('span', { class: `forma ${tiene ? 'tiene' : vista ? 'visto' : 'sin'}`, html: dibujo(arteBicho(n), '0 0 200 200') + (tiene ? '<svg class="tilde" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="#2f7d5b"/><path d="M5,10 L9,14 L15,6" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg>' : '') });
         }), h('b', {}, visto || at ? F.base : 'Sin ver'));
         fila.addEventListener('click', () => hojaFamilia(app, prov, k));
         return fila;

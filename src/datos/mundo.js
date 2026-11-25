@@ -71,7 +71,7 @@ export const NEGOCIOS = {
   galponS: 'galpon', galponC: 'galpon', galponJ: 'galpon', tinglado: 'torneo', ranchoMaestro: 'rancho',
 };
 // Edificios que agrega el juego (la feria de Salta no está en las zonas aprobadas).
-export const EXTRA = { 'salta:z3': [{ que: 'edificio', quien: 'feria', x: 122, y: 590, s: 0.4, caja: [128, 602, 100, 60] }] };
+export const EXTRA = { 'salta:z3': [{ que: 'edificio', quien: 'feria', x: 28, y: 246, s: 0.4, caja: [30, 248, 100, 62] }] };
 
 // Quién atiende cada negocio, por provincia: [nombre, dibujo]
 export const ATIENDE = {

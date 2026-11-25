@@ -149,7 +149,7 @@ const c36 = await abrir('catalogo-36.mjs', ['SALTA', 'CORR', 'JUJUY', 'GALP_S', 
 const fondos = {
   COMBATE: { salta: c36.SALTA('cfs'), corrientes: c36.CORR('cfc'), jujuy: c36.JUJUY('cfj'), Anselmo: c36.GALP_S('cgs'), Rosendo: c36.GALP_C('cgc'), Eulogia: c36.GALP_J('cgj') },
   CLIMA_COMBATE: { noche: c36.NOCHE, lluvia: c36.capaLluvia(360, 400), nieve: c36.NIEVE, viento: c36.capaViento(360, 400), nublado: c36.capaNublado(360, 400) },
-  CLIMA_MAPA: { lluvia: c36.capaLluvia(360, 760) + c36.charcos, nieve: c36.capaNieve(360, 760) + c36.manchas, viento: c36.capaViento(360, 760) + `<g transform="translate(0 520)">${c36.rodadora}</g>`, nublado: c36.capaNublado(360, 760, true) },
+  CLIMA_MAPA: { lluvia: c36.capaLluvia(360, 760), nieve: c36.capaNieve(360, 760), viento: c36.capaViento(360, 760) + `<g transform="translate(0 520)">${c36.rodadora}</g>`, nublado: c36.capaNublado(360, 760, true) },
 };
 writeFileSync(new URL('fondos.js', destino), `${cabecera}${Object.entries(fondos).map(([k, v]) => `export const ${k} = ${JSON.stringify(v)};`).join('\n')}\n`);
 console.log('Fondos exportados');

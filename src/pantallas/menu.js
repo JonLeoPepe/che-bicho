@@ -5,6 +5,7 @@ import { fondoBajo, fondoCuero, dibujo } from '../arte/escenas.js';
 import { GENTE } from '../arte/gente.js';
 import { MUESTRA } from '../arte/muestra.js';
 import { exportar } from '../nucleo/partida.js';
+import { volumenes } from '../juego/sonido.js';
 
 export function menu(app) {
   const pa = app.partida;
@@ -31,7 +32,7 @@ export function opciones(app) {
   p.append(h('div', { class: 'fondo', html: fondoCuero() }), cabecera('Opciones', () => app.volver(), true));
   const deslizador = (etq, clave) => {
     const r = h('input', { type: 'range', min: 0, max: 100, value: Math.round(pa.opciones[clave] * 100), 'aria-label': etq });
-    r.addEventListener('change', () => { pa.opciones[clave] = Number(r.value) / 100; app.guardarCallado(); });
+    r.addEventListener('change', () => { pa.opciones[clave] = Number(r.value) / 100; volumenes(pa.opciones); app.guardarCallado(); });
     return h('label', { class: 'deslizador' }, h('span', {}, etq), r);
   };
   const velocidades = [['lenta', 'Lenta'], ['normal', 'Normal'], ['rapida', 'Rápida']];
@@ -45,6 +46,7 @@ export function opciones(app) {
     h('h2', {}, 'Juego'), h('p', { class: 'rotulo' }, 'Velocidad del texto'), seg, h('hr'),
     h('h2', {}, 'Partida'),
     boton('Copiar código de partida', { color: 'verde', tam: 'medio', onclick: () => app.ir('codigo') }),
+    boton('Cancha de prueba', { color: 'marron', tam: 'medio', onclick: () => app.ir('cancha') }),
     boton('Cerrar sesión', { color: 'marron', tam: 'medio', onclick: () => app.salir() }),
     h('p', { class: 'nota centro' }, 'El código sirve de respaldo y para jugar en otro navegador.'));
   p.append(papel(96, 570, panel));

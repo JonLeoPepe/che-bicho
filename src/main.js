@@ -7,6 +7,7 @@ import { mapa } from './juego/mapa.js';
 import { prologo } from './juego/prologo.js';
 import { menuJuego, libreta, mochila, bichos, personaje, cinto, carta } from './juego/menus.js';
 import { aviso } from './ui.js';
+import { volumenes } from './juego/sonido.js';
 import { paisajeAncho } from './arte/escenas.js';
 
 const PANTALLAS = { inicio, nueva, continuar, importar: importarCodigo, menu, opciones, codigo, como, cancha, sorteo, combate: pantallaCombate, mapa, prologo, menuJuego, libreta, mochila, bichos, personaje, cinto, carta };
@@ -42,7 +43,7 @@ const app = {
     this.pila.pop(); mostrar(this.pila.at(-1));
   },
   async entrar(partida) {
-    this.partida = partida; pedirPersistencia();
+    this.partida = partida; pedirPersistencia(); volumenes(partida.opciones);
     this.base(partida.prologo ? 'mapa' : 'prologo');
     aviso(escenario, `¡Hola, ${partida.nombre}!`);
   },

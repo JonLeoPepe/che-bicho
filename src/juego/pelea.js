@@ -74,7 +74,7 @@ export async function pelearSalvaje(app, s, ctx, alFin) {
   const F = FAMILIAS[s.familia];
   const rival = crearBicho(s.familia, { nivel: s.nivel, camino: s.camino, pasiva: s.nivel >= 3 ? F.pasivas[s.nivel % 2] : null });
   const L1 = nuevoLado([rival]);
-  marcarVisto(P, s.familia, ctx.lugar);
+  marcarVisto(P, s.familia, ctx.lugar, rival.nombre);
   musica('combate'); sonar('salvaje');
   app.ir(() => combate(app, {
     ladoMio: L0, ladoRival: L1, rival: { nombre: rival.nombre, ia: s.caracter }, clima: ctx.clima, arte: BICHOS, guayaca: `<g transform="scale(1.6)">${GUAYACA}</g>`,
@@ -163,6 +163,7 @@ function pantallaSorteo(app, { o, misCuatro, susCuatro, rng }) {
     return el;
   }));
   const ellos = mates(susCuatro, false), nos = mates(misCuatro, true);
+  for (const b of susCuatro) marcarVisto(P, b.familia, ZONAS[P.pos.prov][P.pos.zona].nombre, b.nombre);
   p.append(papel(80, 596, h('div', { class: 'formulario' },
     h('p', { class: 'rotulo centro' }, '¡A los mates! Salen 4 de cada lado.'),
     h('p', { class: 'rotulo' }, o.nombre), ellos,
@@ -180,7 +181,6 @@ function pantallaSorteo(app, { o, misCuatro, susCuatro, rng }) {
     }), { reemplazar: true });
   }
   p.foco = nos.querySelector('button');
-  void P;
   return p;
 }
 

@@ -3,6 +3,7 @@ import { h, en, boton, cabecera, papel } from '../ui.js';
 import { fondoCuero, dibujo } from '../arte/escenas.js';
 import { PERSONAS } from '../arte/personas.js';
 import { PRENDAS_ICO, MEDALLAS, ICONOS } from '../arte/ui-arte.js';
+import { COMBATE } from '../arte/fondos.js';
 import { DICHOS, PROVINCIAS, DIBUJO_CAPATAZ, trato } from '../datos/mundo.js';
 import { PRENDAS, PRENDA_DESAFIO } from '../datos/tienda.js';
 import { FAMILIAS } from '../datos/familias.js';
@@ -32,7 +33,7 @@ export function galpon(app, prov) {
   const dib = PERSONAS[DIBUJO_CAPATAZ[cap]] || '';
   const nombre = `${prov === 'jujuy' ? 'Capataza' : 'Capataz'} ${cap}`;
   const p = h('section', { class: 'pantalla galpon' });
-  p.append(h('div', { class: 'fondo', html: `<svg viewBox="0 0 360 760" xmlns="http://www.w3.org/2000/svg" class="fondo-svg"><defs><linearGradient id="gal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a3a24"/><stop offset="1" stop-color="#2e1c12"/></linearGradient></defs><rect width="360" height="760" fill="url(#gal)"/><path d="M0,120 C120,40 240,40 360,120" fill="none" stroke="#8a6a4a" stroke-width="10"/>${[40, 100, 160, 220, 280, 340].map((x) => `<path d="M${x},${120 - 30 * Math.sin(Math.PI * x / 360)} L${x},470" stroke="#4a2e1c" stroke-width="6"/>`).join('')}<rect y="470" width="360" height="290" fill="#a8845a"/>${Array.from({ length: 18 }, (_, i) => `<ellipse cx="${10 + i * 20}" cy="${500 + (i % 2) * 8}" rx="9" ry="11" fill="${['#c8562a', '#2f7d5b', '#e2b83a', '#3a5a8a'][i % 4]}" opacity=".85"/>`).join('')}<g transform="translate(120 230) scale(1)">${dib}</g></svg>` }));
+  p.append(h('div', { class: 'fondo', html: `<svg viewBox="0 0 360 760" xmlns="http://www.w3.org/2000/svg" class="fondo-svg"><rect width="360" height="760" fill="#a8845a"/>${COMBATE[cap] || ''}<rect y="400" width="360" height="360" fill="#a8845a"/><path d="M0,400 L360,400" stroke="#2a1c15" stroke-width="2"/><g transform="translate(120 196) scale(1.1)">${dib}</g></svg>` }));
   p.append(cabecera(`Galpón de ${cap}`, () => app.volver(), true));
   const caja = en(h('div', { class: 'galpon-ops' }), 18, 560, 324, 180);
   p.append(caja);
