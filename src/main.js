@@ -3,10 +3,13 @@ import { crearAlmacen, indexedDB_, memoria, pedirPersistencia } from './platafor
 import { inicio, nueva, continuar, importarCodigo } from './pantallas/inicio.js';
 import { menu, opciones, codigo, como } from './pantallas/menu.js';
 import { cancha, sorteo, pantallaCombate } from './pantallas/cancha.js';
+import { mapa } from './juego/mapa.js';
+import { prologo } from './juego/prologo.js';
+import { menuJuego, libreta, mochila, bichos, personaje, cinto, carta } from './juego/menus.js';
 import { aviso } from './ui.js';
 import { paisajeAncho } from './arte/escenas.js';
 
-const PANTALLAS = { inicio, nueva, continuar, importar: importarCodigo, menu, opciones, codigo, como, cancha, sorteo, combate: pantallaCombate };
+const PANTALLAS = { inicio, nueva, continuar, importar: importarCodigo, menu, opciones, codigo, como, cancha, sorteo, combate: pantallaCombate, mapa, prologo, menuJuego, libreta, mochila, bichos, personaje, cinto, carta };
 const ANCHO = 360, ALTO = 760;
 
 const escenario = document.getElementById('escenario');
@@ -26,28 +29,32 @@ try { back = indexedDB_(); await back.todos('cuentas'); } catch { back = memoria
 const almacen = crearAlmacen(back);
 
 const app = {
-  almacen, partida: null, pila: [],
+  almacen, partida: null, pila: [], temporal: {},
+  /** Va a una pantalla, por nombre o con una función (app) => elemento. */
   ir(nombre, { reemplazar = false } = {}) {
     if (reemplazar) this.pila.pop();
     this.pila.push(nombre); mostrar(nombre);
   },
+  /** Deja la pila con una sola pantalla (por ejemplo, el mapa después de un combate). */
+  base(nombre = 'mapa') { this.pila = [nombre]; mostrar(nombre); },
   volver() {
     if (this.pila.length <= 1) return;
     this.pila.pop(); mostrar(this.pila.at(-1));
   },
   async entrar(partida) {
     this.partida = partida; pedirPersistencia();
-    this.pila = ['menu']; mostrar('menu');
+    this.base(partida.prologo ? 'mapa' : 'prologo');
     aviso(escenario, `¡Hola, ${partida.nombre}!`);
   },
   salir() { this.partida = null; this.pila = ['inicio']; mostrar('inicio'); },
   aviso: (t, o) => aviso(escenario, t, o),
-  async guardarCallado() { if (this.partida) this.partida = await almacen.guardarPartida(this.partida); },
+  async guardarCallado() { if (this.partida) { const g = await almacen.guardarPartida(this.partida); this.partida.guardada = g.guardada; } },
+  get escenario() { return escenario; },
 };
 
 let actual = null;
 function mostrar(nombre) {
-  const p = PANTALLAS[nombre](app);
+  const p = typeof nombre === 'function' ? nombre(app) : PANTALLAS[nombre](app);
   if (actual) actual.remove();
   escenario.append(p); actual = p;
   requestAnimationFrame(() => p.foco?.focus?.({ preventScroll: true }));
@@ -55,8 +62,8 @@ function mostrar(nombre) {
 
 // ---------------- Teclado (PC): Esc vuelve, Enter y Espacio tocan lo que tiene el foco ----------------
 addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') { e.preventDefault(); app.volver(); return; }
-  const f = actual?.teclas?.[e.key];
+  if (e.key === 'Escape') { e.preventDefault(); if (actual?.teclasDialogo?.Escape) actual.teclasDialogo.Escape(); else if (actual?.alEscape) actual.alEscape(); else app.volver(); return; }
+  const f = actual?.teclasDialogo ? actual.teclasDialogo[e.key] : actual?.teclas?.[e.key];
   if (f && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) { e.preventDefault(); f(); }
 });
 

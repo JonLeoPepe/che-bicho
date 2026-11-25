@@ -102,3 +102,69 @@ console.log('Personas exportadas:', Object.keys(personas).length);
 // ---------- Edificios sueltos que el juego agrega (la feria de Salta, que no está en las zonas) ----------
 const { feria } = await import(new URL('edificios.mjs', fuente).href);
 writeFileSync(new URL('edificios.js', destino), `${cabecera}export const EDIFICIOS = ${JSON.stringify({ feria: feria() })};\n`);
+
+// ---------- Interfaz del juego: íconos, pilchas, interiores, HUD y medallas (lotes 14b a 24a) ----------
+let nAbrir = 0;
+async function abrir(archivo, nombres) {
+  let txt = readFileSync(new URL(archivo, fuente), 'utf8');
+  const ya = new Set([...txt.matchAll(/^export (?:const|function) (\w+)/gm)].map((m) => m[1]));
+  const faltan = nombres.filter((n) => !ya.has(n));
+  if (faltan.length) txt += `\nexport { ${faltan.join(', ')} };\n`;
+  const tmp = new URL(`_exportar-ui${nAbrir++}-${archivo}`, fuente);
+  writeFileSync(tmp, txt);
+  try { return await import(tmp.href); } finally { unlinkSync(tmp); }
+}
+const c29 = await abrir('catalogo-29.mjs', ['moneda']);
+const c30 = await abrir('catalogo-30.mjs', ['IC']);
+const c31 = await abrir('catalogo-31.mjs', ['P']);
+const c32 = await abrir('catalogo-32.mjs', ['N']);
+const c35 = await abrir('catalogo-35.mjs', ['MOM', 'CLI', 'NOMMOM']);
+const c37 = await abrir('catalogo-37.mjs', ['guayaca', 'mateN']);
+const c38 = await abrir('catalogo-38.mjs', ['FONDO']);
+const c39 = await abrir('catalogo-39.mjs', ['ICN']);
+const c46 = await abrir('catalogo-46.mjs', ['chipa', 'tamal', 'empanada']);
+const c47 = await abrir('catalogo-47.mjs', ['insignia', 'MOT']);
+const c61 = await abrir('catalogo-61.mjs', ['PR', 'piedra', 'vestir', 'PILCHAS']);
+const { fogon } = await import(new URL('marca-changa.mjs', fuente).href);
+const ICONOS = {
+  peperina: c30.IC.peperina, cedron: c30.IC.cedron, jarilla: c30.IC.jarilla, sahumerio: c30.IC.sahumerio, ruda: c30.IC.ruda, mate: c30.IC.mate,
+  carpa: c39.ICN.carpa, corral: c39.ICN.corral, palosanto: c32.N.palosanto, miel: c32.N.miel, pista: c32.N.pista, boleadora: c32.N.boleadora,
+  machete: c32.N.machete, canoa: c32.N.canoa, soga: c32.N.soga, chipa: c46.chipa, tamales: c46.tamal, empanadas: c46.empanada,
+  piedra: `<g transform="translate(4 4)">${c61.piedra()}</g>`,
+};
+const PRENDAS_ICO = { poncho: c31.P.poncho, faja: c31.P.faja, rastra: c31.P.rastra, 'pañuelo': c31.P.panuelo, boina: c31.P.boina, alpargatas: c31.P.alpargatas, espuelas: c32.N.espuelas, vincha: c32.N.vincha, 'chiripá': c32.N.chiripa, 'poncho de vicuña': c61.PR.vicuna, 'sombrero de palma': c61.PR.palma, aguayo: c61.PR.aguayo };
+const MEDALLAS = { salta: c47.insignia(0, 0, c47.MOT.empanada), corrientes: c47.insignia(0, 0, c47.MOT.acordeon), jujuy: c47.insignia(0, 0, c47.MOT.cerro) };
+const PILCHAS = {};
+for (const [cod, nom, , , spec, , extra] of c61.PILCHAS) PILCHAS[cod] = { nombre: nom, jugador: c61.vestir('j', spec), jugadora: c61.vestir('a', { ...spec, ...(extra?.a || {}) }) };
+const ui = {
+  ICONOS, PRENDAS_ICO, MEDALLAS, PILCHAS, MOM: c35.MOM, CLI: c35.CLI, MONEDA: c29.moneda(0, 0), INTERIOR: c38.FONDO,
+  GUAYACA: c37.guayaca(0, 0, 1, false), GUAYACA_ABIERTA: c37.guayaca(0, 0, 1, true), MATE_NEGRO: c37.mateN,
+  FOGON: fogon(0, 0, 1, true), FOGON_APAGADO: fogon(0, 0, 1, false),
+};
+writeFileSync(new URL('ui-arte.js', destino), `${cabecera}${Object.entries(ui).map(([k, v]) => `export const ${k} = ${JSON.stringify(v)};`).join('\n')}\n`);
+console.log('Interfaz exportada: CLI', Object.keys(c35.CLI).join(' '), 'interiores', Object.keys(c38.FONDO).length, 'pilchas', Object.keys(PILCHAS).length);
+
+// ---------- Fondos de combate por provincia, galpones y clima animado (lote 15a) ----------
+const c36 = await abrir('catalogo-36.mjs', ['SALTA', 'CORR', 'JUJUY', 'GALP_S', 'GALP_C', 'GALP_J', 'publico', 'capaLluvia', 'capaNieve', 'capaViento', 'capaNublado', 'NOCHE', 'NIEVE', 'charcos', 'manchas', 'rodadora']);
+const fondos = {
+  COMBATE: { salta: c36.SALTA('cfs'), corrientes: c36.CORR('cfc'), jujuy: c36.JUJUY('cfj'), Anselmo: c36.GALP_S('cgs'), Rosendo: c36.GALP_C('cgc'), Eulogia: c36.GALP_J('cgj') },
+  CLIMA_COMBATE: { noche: c36.NOCHE, lluvia: c36.capaLluvia(360, 400), nieve: c36.NIEVE, viento: c36.capaViento(360, 400), nublado: c36.capaNublado(360, 400) },
+  CLIMA_MAPA: { lluvia: c36.capaLluvia(360, 760) + c36.charcos, nieve: c36.capaNieve(360, 760) + c36.manchas, viento: c36.capaViento(360, 760) + `<g transform="translate(0 520)">${c36.rodadora}</g>`, nublado: c36.capaNublado(360, 760, true) },
+};
+writeFileSync(new URL('fondos.js', destino), `${cabecera}${Object.entries(fondos).map(([k, v]) => `export const ${k} = ${JSON.stringify(v)};`).join('\n')}\n`);
+console.log('Fondos exportados');
+
+// ---------- Festejo del Torneo (lote 17b) ----------
+const c47b = await abrir('catalogo-47.mjs', ['rayos', 'estallido', 'mateCopa', 'publicoC', 'brillos']);
+const festejo = {
+  RAYOS: c47b.rayos, ESTALLIDOS: `${c47b.estallido(46, 52, '#f2d27a', 0)}${c47b.estallido(314, 56, '#e86a5a', 0.8)}${c47b.estallido(40, 230, '#8ec4d8', 1.6)}${c47b.estallido(320, 236, '#a8d86a', 2.2)}`,
+  MATE_COPA: c47b.mateCopa, PUBLICO: c47b.publicoC, BRILLOS: c47b.brillos,
+};
+writeFileSync(new URL('festejo.js', destino), `${cabecera}${Object.entries(festejo).map(([k, v]) => `export const ${k} = ${JSON.stringify(v)};`).join('\n')}\n`);
+console.log('Festejo exportado');
+
+// ---------- Rancho de Don Abel (lote 17a) e íconos de tipo (lote 15c) ----------
+const c46b = await abrir('catalogo-46.mjs', ['rancho']);
+const c38b = await abrir('catalogo-38.mjs', ['FINAL']);
+writeFileSync(new URL('rancho.js', destino), `${cabecera}export const RANCHO = ${JSON.stringify(c46b.rancho)};\nexport const ICO_TIPO = ${JSON.stringify(c38b.FINAL)};\n`);
+console.log('Rancho exportado');

@@ -302,9 +302,10 @@ export function reemplazosMaquina(S, clima, lados = [0, 1]) {
 }
 
 /** Arma un lado con su equipo (los 4 que salieron del sorteo, o el equipo contra un salvaje). */
-export function nuevoLado(eq) {
+export function nuevoLado(eq, { conservarVida = false } = {}) {
   const L = { eq: eq.map(clonB), act: 0, rel: R.relevoIni, nube: 0 };
-  for (const b of L.eq) { b.ag = R.agIni + (b.pas === 'guapo' || b.prenda === 'aguayo' ? 1 : 0); b.hp = b.hpmax; b.recien = true; b.marca = null; b.ef = {}; b.freno = 0; b.cubprev = false; }
+  for (const b of L.eq) { b.ag = R.agIni + (b.pas === 'guapo' || b.prenda === 'aguayo' ? 1 : 0); if (!conservarVida) b.hp = b.hpmax; b.recien = true; b.marca = null; b.ef = {}; b.freno = 0; b.cubprev = false; }
+  const i = L.eq.findIndex((b) => b.hp > 0); L.act = i < 0 ? 0 : i;
   return L;
 }
 
