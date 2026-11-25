@@ -15,8 +15,8 @@ jobs:
   probar:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - run: npm test
@@ -27,7 +27,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Versión del caché sin internet
         run: sed -i "s/__VERSION__/${GITHUB_SHA::8}/" sw.js
       - name: Armar el sitio (sin las fuentes del arte ni las pruebas)
@@ -35,9 +35,9 @@ jobs:
           mkdir _sitio
           cp -r index.html estilos.css sw.js manifest.webmanifest icono.svg icono-192.png icono-512.png fuentes src _sitio/
           touch _sitio/.nojekyll
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _sitio
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
