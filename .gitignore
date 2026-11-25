@@ -1,0 +1,4 @@
+node_modules/
+_sitio/
+arte/fuente/*.html
+.DS_Store

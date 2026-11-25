@@ -1,0 +1,18 @@
+{
+  "name": "¡Che, Bicho!",
+  "short_name": "Che, Bicho",
+  "description": "Una aventura gaucha. Prototipo v1.0. By J. Pepe",
+  "lang": "es-AR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#5e351c",
+  "theme_color": "#5e351c",
+  "icons": [
+    { "src": "icono-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icono-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icono-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icono.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

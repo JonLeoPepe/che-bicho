@@ -1,0 +1,11 @@
+{
+  "name": "che-bicho",
+  "version": "0.1.0",
+  "description": "¡Che, Bicho! Una aventura gaucha. Prototipo v1.0. By J. Pepe",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.js\"",
+    "arte": "node herramientas/exportar-arte.mjs"
+  }
+}

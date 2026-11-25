@@ -1,0 +1,26 @@
+import { svg, COLOR_TIPO } from './base-arte.mjs';
+const O = '#2a1c15';
+const L = (w = 2) => `stroke="${O}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
+const B = '#fbf6ea';
+export const insig = (fondo, glifo, borde = O) => svg('0 0 48 48', `<circle cx="24" cy="24" r="21" fill="${fondo}" stroke="${borde}" stroke-width="3"/><circle cx="24" cy="24" r="17" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1.6"/>${glifo}`);
+export const G = {
+  mojado: `<path d="M24,11 C19,19 15,24 15,29 C15,34 19,37 24,37 C29,37 33,34 33,29 C33,24 29,19 24,11Z" fill="${B}" ${L()}/><path d="M19,29 C19,32 21,33 22,33" stroke="${COLOR_TIPO.Agua}" stroke-width="2" fill="none" stroke-linecap="round"/>`,
+  chamuscado: `<path d="M24,10 C30,17 34,22 32,30 C31,35 27,38 24,38 C20,38 16,35 16,30 C16,25 20,23 21,18 C23,21 24,23 26,24 C27,20 26,15 24,10Z" fill="${B}" ${L()}/><path d="M24,26 C27,29 27,33 24,34 C21,33 21,29 24,26Z" fill="${COLOR_TIPO.Fuego}"/>`,
+  enredado: `<path d="M14,34 C18,24 30,30 30,20 C30,14 22,13 22,19 C22,23 28,22 28,18" fill="none" stroke="${B}" stroke-width="4" stroke-linecap="round"/><path d="M14,34 C18,24 30,30 30,20 C30,14 22,13 22,19 C22,23 28,22 28,18" fill="none" stroke="${O}" stroke-width="1.2" stroke-linecap="round" opacity=".5"/><path d="M31,27 C36,26 37,31 33,32 C31,32 30,30 31,27Z M17,24 C13,21 15,17 19,19Z" fill="${B}" ${L(1.4)}/>`,
+  embarrado: `<path d="M12,30 C10,24 16,22 18,25 C18,19 26,17 28,22 C31,18 38,21 35,27 C40,28 38,35 33,34 C31,38 24,38 22,35 C18,38 12,36 13,32Z" fill="${B}" ${L()}/><circle cx="20" cy="29" r="2" fill="${COLOR_TIPO.Tierra}"/><circle cx="28" cy="27" r="2.6" fill="${COLOR_TIPO.Tierra}"/>`,
+  escarcha: `<g stroke="${B}" stroke-width="3.4" stroke-linecap="round"><path d="M24,10 L24,38 M12,17 L36,31 M12,31 L36,17"/></g><g stroke="${B}" stroke-width="2.2" stroke-linecap="round"><path d="M20,12 L24,16 L28,12 M20,36 L24,32 L28,36"/></g>`,
+  cargado: `<path d="M27,9 L15,27 L23,27 L20,39 L33,20 L25,20 Z" fill="${B}" ${L()}/>`,
+  apestado: `<circle cx="20" cy="30" r="7" fill="${B}" ${L()}/><circle cx="29" cy="21" r="5.4" fill="${B}" ${L()}/><circle cx="21" cy="16" r="3.6" fill="${B}" ${L()}/><circle cx="18" cy="28" r="1.6" fill="${COLOR_TIPO.Veneno}"/><circle cx="22" cy="31" r="1.4" fill="${COLOR_TIPO.Veneno}"/>`,
+  polvareda: `<path d="M12,30 C12,22 22,20 26,26 C28,30 24,34 20,31 M18,20 C24,13 34,15 35,23 M28,34 C32,34 36,31 36,27" fill="none" stroke="${B}" stroke-width="3.4" stroke-linecap="round"/><circle cx="14" cy="18" r="1.8" fill="${B}"/><circle cx="34" cy="36" r="1.6" fill="${B}"/>`,
+  furia: `<path d="M16,16 C20,20 20,22 16,26 M32,16 C28,20 28,22 32,26 M18,32 C22,28 26,28 30,32 M18,14 C22,18 26,18 30,14" fill="none" stroke="${B}" stroke-width="3.6" stroke-linecap="round"/>`,
+  sueno: `<path d="M28,10 C18,12 13,22 16,30 C19,37 29,40 36,34 C28,34 22,28 22,21 C22,16 24,12 28,10Z" fill="${B}" ${L()}/><circle cx="33" cy="16" r="1.8" fill="${B}"/><circle cx="37" cy="23" r="1.4" fill="${B}"/>`,
+  mareo: `<path d="M24,24 C24,21 28,21 28,24 C28,28 21,29 20,24 C19,18 29,16 31,23 C33,31 22,35 17,30 C12,24 15,14 24,13" fill="none" stroke="${B}" stroke-width="3.2" stroke-linecap="round"/>`,
+  empaque: `<path d="M24,10 L24,36" stroke="${O}" stroke-width="7" stroke-linecap="round"/><path d="M24,10 L24,36" stroke="${B}" stroke-width="4.4" stroke-linecap="round"/><path d="M20,36 L24,40 L28,36Z" fill="${B}" ${L(1.4)}/><path d="M14,22 C18,18 30,18 34,22 C30,26 18,26 14,22Z" fill="none" stroke="${B}" stroke-width="2.6"/><path d="M34,22 C38,24 38,30 34,32" fill="none" stroke="${B}" stroke-width="2.4" stroke-linecap="round"/>`,
+  helado: `<rect x="13" y="14" width="22" height="22" rx="4" fill="${B}" ${L()}/><path d="M17,19 L22,19 M17,23 L20,23" stroke="#8ac0e0" stroke-width="2" stroke-linecap="round"/><path d="M26,31 L31,26" stroke="#8ac0e0" stroke-width="2" stroke-linecap="round"/>`,
+  lodazal: `<path d="M10,30 C14,26 18,30 22,27 C26,24 30,30 38,26 L38,36 L10,36Z" fill="${B}" ${L()}/><circle cx="18" cy="21" r="3" fill="none" stroke="${B}" stroke-width="2"/><circle cx="28" cy="17" r="2.2" fill="none" stroke="${B}" stroke-width="2"/>`,
+  atado: `<path d="M12,20 C20,14 28,26 36,20 M12,28 C20,22 28,34 36,28" fill="none" stroke="${B}" stroke-width="3.4" stroke-linecap="round"/><circle cx="24" cy="24" r="4.4" fill="${B}" ${L(1.6)}/>`,
+  quebrado: `<path d="M24,10 L35,15 L33,29 C31,34 27,37 24,38 C21,37 17,34 15,29 L13,15Z" fill="${B}" ${L()}/><path d="M24,12 L21,20 L26,24 L22,32 L24,37" fill="none" ${L(2.2)}/>`,
+  avivado: `<path d="M18,12 C23,18 25,22 23,28 C22,33 19,36 17,36 C13,36 11,33 11,29 C11,25 15,23 16,18Z M31,14 C35,20 38,24 36,31 C35,35 32,38 29,38 C25,38 23,35 24,31 C25,27 29,25 31,14Z" fill="${B}" ${L()}/>`,
+  nube: `<path d="M12,30 C8,30 8,22 14,22 C14,15 24,13 27,19 C31,15 38,18 36,24 C41,25 40,32 35,32 L14,32 C13,32 12,31 12,30Z" fill="${B}" ${L()}/><path d="M18,36 L17,40 M24,36 L24,41 M30,36 L31,40" stroke="${B}" stroke-width="2.4" stroke-linecap="round"/>`,
+  encandilado: `<path d="M10,24 C16,16 32,16 38,24 C32,32 16,32 10,24Z" fill="${B}" ${L()}/><circle cx="24" cy="24" r="4" fill="${O}"/><path d="M24,9 L24,13 M14,12 L16,15 M34,12 L32,15" stroke="${B}" stroke-width="2.4" stroke-linecap="round"/>`,
+};
