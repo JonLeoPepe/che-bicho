@@ -14,7 +14,7 @@ import { CHANGUEROS } from '../datos/changas.js';
 import { momento, dia, climaDe, climaZona, enSuMomento, delEquipo, NOMBRE_MOMENTO } from '../nucleo/progreso.js';
 import { actualizarOferta, fogonPrendido } from '../nucleo/changas.js';
 import { Rng } from '../nucleo/rng.js';
-import { dialogo, avisoMapa } from './dialogo.js';
+import { dialogo, avisoMapa, avisoChanga } from './dialogo.js';
 import { cargarBichos, arteBicho, pelearSalvaje, puedeDesafiar } from './pelea.js';
 import { hablarCon, entrarA } from './gente.js';
 import { musica, sonar } from './sonido.js';
@@ -305,9 +305,36 @@ export function mapa(app) {
     if (!r) { jug.ruta = []; return; }
     jug.ruta = r; jug.objetivo = objetivo;
   }
+  // Cruceta táctil (una palanca redonda, sin forma de cruz): si se apoya el dedo y se arrastra, aparece la palanca donde se apoyó y el personaje camina hacia ese lado.
+  // Si se toca y se suelta, camina hasta ahí (o habla, entra o pelea).
+  let toque = null;
+  const cruz = h('div', { class: 'cruceta', html: '<svg viewBox="-40 -40 80 80"><circle r="36" fill="#2a1c15" opacity=".22"/><circle r="36" fill="none" stroke="#fbf3e2" stroke-width="3" opacity=".8"/><circle class="perilla" r="13" fill="#c8562a" stroke="#2a1c15" stroke-width="2.4"/></svg>' });
+  p.append(cruz);
   toques.addEventListener('pointerdown', (e) => {
     if (ocupado) return;
-    const [x, y] = enEscenario(e); const q = queHay(x, y);
+    const [x, y] = enEscenario(e);
+    toque = { x, y, id: e.pointerId, cruceta: false };
+    try { toques.setPointerCapture(e.pointerId); } catch { /* sin captura */ }
+  });
+  toques.addEventListener('pointermove', (e) => {
+    if (!toque || e.pointerId !== toque.id || ocupado) return;
+    const [x, y] = enEscenario(e); const dx = x - toque.x, dy = y - toque.y;
+    if (!toque.cruceta && Math.hypot(dx, dy) > 16 && toque.y > 70 && toque.y < 672) { toque.cruceta = true; jug.ruta = []; Object.assign(cruz.style, { left: `${toque.x - 40}px`, top: `${toque.y - 40}px`, display: 'block' }); }
+    if (toque.cruceta) {
+      const n = Math.hypot(dx, dy) || 1, k = Math.min(1, n / 30);
+      jug.palanca = n > 8 ? [dx / n, dy / n] : null;
+      cruz.querySelector('.perilla').setAttribute('transform', `translate(${(dx / n) * 22 * k} ${(dy / n) * 22 * k})`);
+    }
+  });
+  const soltar = (e) => {
+    if (!toque || e.pointerId !== toque.id) return;
+    const t = toque; toque = null; jug.palanca = null; cruz.style.display = 'none';
+    if (!t.cruceta) tocarEn(t.x, t.y);
+  };
+  toques.addEventListener('pointerup', soltar); toques.addEventListener('pointercancel', soltar);
+  function tocarEn(x, y) {
+    if (ocupado) return;
+    const q = queHay(x, y);
     if (q.menu) return abrirMenu();
     if (q.equipo !== undefined) return app.ir('bichos');
     if (q.carta) return app.ir('carta');
@@ -318,7 +345,7 @@ export function mapa(app) {
     const lado = y < LIM.y0 + 14 ? 'arriba' : y > LIM.y1 - 6 ? 'abajo' : x < LIM.x0 + 14 ? 'izquierda' : x > LIM.x1 - 14 ? 'derecha' : null;
     if (lado && Z.salidas[lado]) return irA(Math.max(LIM.x0, Math.min(LIM.x1, x)), Math.max(LIM.y0, Math.min(LIM.y1, y)), { salida: lado });
     irA(x, y);
-  });
+  }
   async function llegar(obj) {
     if (obj.bicho) return encuentro(obj.bicho);
     if (obj.persona) return hablar(obj.persona);
@@ -387,7 +414,7 @@ export function mapa(app) {
   }
 
   // ---------- bucle ----------
-  let t0 = performance.now(), acumAparece = 0, acumOrden = 0, acumGuardar = 0, diaVisto = dia(P.reloj);
+  let t0 = performance.now(), acumAuto = 0, acumAparece = 0, acumOrden = 0, acumGuardar = 0, diaVisto = dia(P.reloj);
   function paso(t) {
     if (!vivo || !p.isConnected) { removeEventListener('keydown', kd); removeEventListener('keyup', ku); return; }
     const dt = Math.min(0.05, (t - t0) / 1000); t0 = t;
@@ -399,6 +426,7 @@ export function mapa(app) {
       acumAparece += dt; if (acumAparece > (salvajes.length < 2 ? 1.2 : 3.5)) { acumAparece = 0; aparecer(); }
       acumOrden += dt; if (acumOrden > 0.25) { acumOrden = 0; dibujarCosas(); pintarClima(); }
       acumGuardar += dt; if (acumGuardar > 1) { acumGuardar = 0; pintarHud(); }
+      acumAuto += dt; if (acumAuto > 30) { acumAuto = 0; P.pos = { prov, zona: zonaId, x: jug.x, y: jug.y }; app.guardarCallado(); }
       domadores();
     }
     ubicarMoviles();
@@ -407,12 +435,13 @@ export function mapa(app) {
   function moverJugador(dt) {
     let dx = 0, dy = 0;
     for (const k of teclas) { dx += DIR[k][0]; dy += DIR[k][1]; }
+    if (jug.palanca) { dx = jug.palanca[0]; dy = jug.palanca[1]; }
     jug.tecla = !!(dx || dy);
     if (dx || dy) {
       const n = Math.hypot(dx, dy); const nx = jug.x + (dx / n) * VEL * dt, ny = jug.y + (dy / n) * VEL * dt;
       if (dx) jug.mira = dx;
       const lado = ny < LIM.y0 ? 'arriba' : ny > LIM.y1 ? 'abajo' : nx < LIM.x0 ? 'izquierda' : nx > LIM.x1 ? 'derecha' : null;
-      if (lado && Z.salidas[lado]) { teclas.clear(); return salir(lado); }
+      if (lado && Z.salidas[lado]) { teclas.clear(); jug.palanca = null; return salir(lado); }
       if (libre(nx, ny)) { jug.x = nx; jug.y = ny; } else if (libre(nx, jug.y)) jug.x = nx; else if (libre(jug.x, ny)) jug.y = ny;
       jug.paso += dt; tocarCerca(); return;
     }
@@ -475,10 +504,10 @@ export function mapa(app) {
     }
     const charlas = app.temporal.charlas || []; app.temporal.charlas = [];
     if (charlas.length) { ocupado = true; for (const c of charlas) await dialogo(p, { quien: c.quien, dibujo: PERSONAS[c.dibujo] || ADULTOS[c.dibujo] || '', lineas: c.lineas }); ocupado = false; }
-    for (const t of av) await avisoMapa(p, t);
+    for (const t of av) await (typeof t === 'object' ? avisoChanga(p, t) : avisoMapa(p, t));
   })();
   void SALUDOS; void trato;
-  p.__debug = { salvajes: () => salvajes, jug, gente, edificios, P, recargar: () => { vivo = false; app.base('mapa'); } };
+  p.__debug = { app, salvajes: () => salvajes, jug, gente, edificios, P, recargar: () => { vivo = false; app.base('mapa'); } };
   p.foco = toques;
   return p;
 }

@@ -75,3 +75,14 @@ export function avisoMapa(p, txt, { ms = 2000 } = {}) {
   p.append(a);
   return new Promise((r) => { setTimeout(() => a.classList.add('aviso-fuera'), ms); setTimeout(() => { a.remove(); r(); }, ms + 350); });
 }
+
+/** Aviso de avance de changa (lote 24a): dibujo, "Changa de X", qué cuenta, barra y "n de total". */
+export function avisoChanga(p, { titulo, sub, dib, n, total }, { ms = 2000 } = {}) {
+  const a = en(h('div', { class: 'aviso-mapa aviso-changa', role: 'status' },
+    h('span', { class: 'ico', html: dib || '' }),
+    h('span', { class: 'txt' }, h('b', {}, titulo), h('small', {}, sub)),
+    h('span', { class: 'pista' }, h('i', { style: { width: `${Math.round(100 * n / total)}%` } })),
+    h('em', {}, `${n} de ${total}`)), 14, 80, 332);
+  p.append(a);
+  return new Promise((r) => { setTimeout(() => a.classList.add('aviso-fuera'), ms); setTimeout(() => { a.remove(); r(); }, ms + 350); });
+}

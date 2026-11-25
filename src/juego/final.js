@@ -67,7 +67,7 @@ function entreRondas(app) {
 }
 
 /** TN3a: ¡Campeón! */
-function campeon(app) {
+export function campeon(app) {
   const P = app.partida; sonar('insignia'); jingle('medalla'); musica('titulo');
   const eq = delEquipo(P);
   const pos = [[2, 372], [266, 372], [2, 478], [266, 478], [84, 556], [184, 556]];
@@ -108,7 +108,7 @@ function creditos(app) {
     ${T(180, 70, 15, 'Torneo del Norte', { f: 'Bree', a: 'middle', c: '#f2d27a' })}${T(180, 104, 28, 'Campeón del Norte', { f: 'Bree', a: 'middle', c: '#fbf3e2' })}
     <g transform="translate(70 120) scale(.75)">${ADULTOS.maestro}</g><g transform="translate(200 120) scale(.75)">${(PILCHAS[P.pilcha] || PILCHAS.P1)[P.avatar]}</g>
     <g transform="translate(140 214)"><rect width="34" height="44" rx="3" fill="#b8925e" stroke="${O}" stroke-width="2"/><rect x="4" y="4" width="26" height="36" fill="#e8d4a8" stroke="${O}" stroke-width="1.2"/><path d="M8,12 L26,12 M8,18 L26,18 M8,24 L22,24" stroke="#8a6a3e" stroke-width="1.4"/></g>
-    <g class="sube">${[['Una aventura gaucha', 'Bree', 17, '#f2d27a'], ['Idea y diseño', 'Nunito', 12, '#c9b48a'], ['Jonathan Pepe', 'Bree', 16, '#fbf3e2'], ['Arte, música y sonido', 'Nunito', 12, '#c9b48a'], ['Dibujados y compuestos por código', 'Bree', 14, '#fbf3e2'], ['Gracias por jugar', 'Bree', 17, '#f2d27a']].map(([t, f, z, c], i) => T(180, 470 + i * 34, z, t, { f, w: f === 'Nunito' ? 800 : 400, a: 'middle', c })).join('')}</g></svg>` }));
+    <g class="aparece">${[['Una aventura gaucha', 'Bree', 17, '#f2d27a'], ['Idea y diseño', 'Nunito', 12, '#c9b48a'], ['Jonathan Pepe', 'Bree', 16, '#fbf3e2'], ['Arte, música y sonido', 'Nunito', 12, '#c9b48a'], ['Dibujados y compuestos por código', 'Bree', 14, '#fbf3e2'], ['Gracias por jugar', 'Bree', 17, '#f2d27a']].map(([t, f, z, c], i) => T(180, 470 + i * 34, z, t, { f, w: f === 'Nunito' ? 800 : 400, a: 'middle', c })).join('')}</g></svg>` }));
   const caja = en(h('div', { class: 'dialogo-caja fija' }, h('p', { class: 'dialogo-nombre' }, 'Don Abel'), h('p', { class: 'dialogo-texto' })), 10, 300, 340, 120);
   p.append(caja);
   const seguir = en(boton('Seguir jugando', { color: 'verde', tam: 'medio', onclick: () => { P.finVisto = true; app.guardarCallado(); app.base('mapa'); } }), 70, 690, 220);

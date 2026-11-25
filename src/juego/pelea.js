@@ -52,7 +52,12 @@ function avisosChanga(app, av) {
     const n = CHANGUEROS[a.id].nombre;
     if (a.cumplida) { sonar('changa'); avisar(app, `✓ Changa cumplida. Andá a cobrarle a ${n}.`); }
     else if (a.reinicio) avisar(app, 'Pasaste por la posta: la changa de aguante vuelve a 0.');
-    else avisar(app, `Changa de ${n}: ${a.n} de ${a.total}.`);
+    else {
+      const r = CHANGUEROS[a.id].lista[app.partida.changas[a.id].activa.i].regla;
+      const sub = r.familia ? `${r.familia} vencidos` : r.tipo ? `De tipo ${r.tipo}, vencidos` : r.vencer ? `Vencidos${r.momento ? ` ${{ noche: 'de noche', manana: 'de mañana', tarde: 'de tarde' }[r.momento]}` : ''}` : r.atrapar ? 'Atrapados' : r.reventones ? 'Reventones' : r.aguante ? 'Domadores ganados' : 'Hecho';
+      const dib = r.familia ? `<svg viewBox="0 0 200 200">${arteBicho(r.familia)}</svg>` : '';
+      avisar(app, { titulo: `Changa de ${n}`, sub, dib, n: a.n, total: a.total });
+    }
   }
 }
 function guardarVida(P, info) { for (const [id, f] of Object.entries(info.vida || {})) { const b = P.bichos.find((x) => x.id === Number(id)); if (b) b.vida = f; } }
