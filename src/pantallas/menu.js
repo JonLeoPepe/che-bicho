@@ -13,13 +13,14 @@ export function menu(app) {
   const estado = h('p', { class: 'nota centro', 'aria-live': 'polite' }, `Guardado: ${new Date(pa.guardada).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}`);
   const panel = h('div', { class: 'formulario' },
     h('div', { class: 'saludo' }, h('div', { class: 'retrato', html: dibujo(GENTE[pa.avatar]) }), h('div', {}, h('p', { class: 'rotulo' }, 'Rancho de Don Abel'), h('h2', {}, pa.nombre), h('p', { class: 'nota' }, `Día ${pa.dia}. ${pa.chirolas} chirolas.`))),
-    h('p', { class: 'nota' }, 'El mapa y los bichos llegan en las próximas etapas. Por ahora podés probar tu aventura: guardarla, cerrar y volver, y pasarla a otro navegador con el código.'),
+    h('p', { class: 'nota' }, 'El mapa llega en la próxima etapa. Por ahora podés probar el combate en la Cancha de prueba, y guardar tu aventura y pasarla a otro navegador con el código.'),
     boton('Guardar', { onclick: async () => { app.partida = await app.almacen.guardarPartida(app.partida); estado.textContent = 'Guardado recién.'; app.aviso('Aventura guardada.'); } }),
+    boton('Cancha de prueba', { color: 'verde', onclick: () => app.ir('cancha') }),
     boton('Opciones', { color: 'marron', onclick: () => app.ir('opciones') }),
     boton('Cómo se juega', { color: 'marron', onclick: () => app.ir('como') }),
     estado);
   p.append(en(h('h1', { class: 'titulo-menu' }, 'Menú'), 0, 22, 360));
-  p.append(papel(80, 520, panel));
+  p.append(papel(80, 580, panel));
   p.foco = panel.querySelector('button');
   return p;
 }

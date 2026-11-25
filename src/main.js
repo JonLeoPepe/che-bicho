@@ -2,10 +2,11 @@
 import { crearAlmacen, indexedDB_, memoria, pedirPersistencia } from './plataforma/almacen.js';
 import { inicio, nueva, continuar, importarCodigo } from './pantallas/inicio.js';
 import { menu, opciones, codigo, como } from './pantallas/menu.js';
+import { cancha, sorteo, pantallaCombate } from './pantallas/cancha.js';
 import { aviso } from './ui.js';
 import { paisajeAncho } from './arte/escenas.js';
 
-const PANTALLAS = { inicio, nueva, continuar, importar: importarCodigo, menu, opciones, codigo, como };
+const PANTALLAS = { inicio, nueva, continuar, importar: importarCodigo, menu, opciones, codigo, como, cancha, sorteo, combate: pantallaCombate };
 const ANCHO = 360, ALTO = 760;
 
 const escenario = document.getElementById('escenario');

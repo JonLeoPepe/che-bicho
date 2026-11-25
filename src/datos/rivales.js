@@ -1,0 +1,21 @@
+// Equipos y niveles de los rivales (equipos-y-niveles, aprobado), y con qué nivel suele llegar el jugador.
+export const RIVALES = [
+  { nombre: 'Arriero Benito', ia: 'Benito', provincia: 'Salta', nivel: 3, llega: 3, provs: ['Salta'], familias: ['Kirkallpa', 'Llamarú', 'Pasacán', 'Pirkasol', 'Mallku', 'Miyurá'] },
+  { nombre: 'Coplera Eusebia', ia: 'Eusebia', provincia: 'Salta', nivel: 3, llega: 3, provs: ['Salta'], familias: ['Yakusapo', 'Lucerna', 'Miyurá', 'Ajinina', 'Llamarú', 'Escarchuña'] },
+  { nombre: 'Acampante Martina', ia: 'Martina', provincia: 'Salta', nivel: 4, llega: 4, provs: ['Salta'], familias: ['Pirkasol', 'Mallku', 'Escarchuña', 'Kirkallpa', 'Lucerna', 'Pasacán'] },
+  { nombre: 'Capataz Anselmo', ia: 'Anselmo', provincia: 'Salta', nivel: 4, llega: 4, provs: ['Salta'], galpon: true, familias: ['Pasacán', 'Ajinina', 'Mallku', 'Kirkallpa', 'Llamarú', 'Lucerna'] },
+  { nombre: 'Don Higinio', ia: 'Higinio', provincia: 'Salta', nivel: 5, llega: 5, provs: ['Salta'], familias: ['Pasacán', 'Yakusapo', 'Ajinina', 'Miyurá', 'Escarchuña', 'Pirkasol'] },
+  { nombre: 'Canoero Eusebio', ia: 'Eusebio', provincia: 'Corrientes', nivel: 5, llega: 6, provs: ['Salta', 'Corrientes'], familias: ['Yacarón', 'Pirayú', 'Rayajá', 'Mbarigüí', 'Kapiyvá', 'Guasú'] },
+  { nombre: 'Acordeonista Ireneo', ia: 'Ireneo', provincia: 'Corrientes', nivel: 5, llega: 6, provs: ['Salta', 'Corrientes'], familias: ['Tatakú', 'Kapiyvá', 'Mburucoa', 'Pajonero', 'Yacarón', 'Ventero'] },
+  { nombre: 'Guía Aníbal', ia: 'Aníbal', provincia: 'Corrientes', nivel: 6, llega: 7, provs: ['Salta', 'Corrientes'], familias: ['Ventero', 'Guasú', 'Rayajá', 'Pajonero', 'Pirayú', 'Mbarigüí'] },
+  { nombre: 'Capataz Rosendo', ia: 'Rosendo', provincia: 'Corrientes', nivel: 7, llega: 7, provs: ['Salta', 'Corrientes'], galpon: true, familias: ['Yacarón', 'Rayajá', 'Pajonero', 'Pirayú', 'Mburucoa', 'Tatakú'] },
+  { nombre: 'Don Anacleto', ia: 'Anacleto', provincia: 'Corrientes', nivel: 8, llega: 8, provs: ['Salta', 'Corrientes'], familias: ['Mbarigüí', 'Guasú', 'Kapiyvá', 'Tatakú', 'Ventero', 'Mburucoa'] },
+  { nombre: 'Cañero Zenón', ia: 'Zenón', provincia: 'Jujuy', nivel: 7, llega: 8, provs: ['Salta', 'Corrientes', 'Jujuy'], familias: ['Allpuma', 'Suri', 'Atoq', 'Aguijón', 'Papacuy', 'Quinti'] },
+  { nombre: 'Andinista Lucía', ia: 'Lucía', provincia: 'Jujuy', nivel: 8, llega: 9, provs: ['Salta', 'Corrientes', 'Jujuy'], familias: ['Quinti', 'Mayuq', 'Tolvanera', 'Chinchay', 'Wiskacha', 'Atoq'] },
+  { nombre: 'Minero Aniceto', ia: 'Aniceto', provincia: 'Jujuy', nivel: 8, llega: 9, provs: ['Salta', 'Corrientes', 'Jujuy'], familias: ['Wiskacha', 'Allpuma', 'Pariwana', 'Suri', 'Aguijón', 'Tolvanera'] },
+  { nombre: 'Capataza Eulogia', ia: 'Eulogia', provincia: 'Jujuy', nivel: 9, llega: 9, provs: ['Salta', 'Corrientes', 'Jujuy'], galpon: true, familias: ['Pariwana', 'Chinchay', 'Wiskacha', 'Mayuq', 'Allpuma', 'Quinti'] },
+  { nombre: 'Don Pascual', ia: 'Pascual', provincia: 'Jujuy', nivel: 10, llega: 10, provs: ['Salta', 'Corrientes', 'Jujuy'], familias: ['Chinchay', 'Tolvanera', 'Papacuy', 'Pariwana', 'Suri', 'Atoq'] },
+  { nombre: 'Torneo, ronda 1: Anselmo', ia: 'Torneo 1', provincia: 'Salta', nivel: 10, llega: 10, provs: ['Salta', 'Corrientes', 'Jujuy'], galpon: true, familias: ['Pasacán', 'Ajinina', 'Mallku', 'Kirkallpa', 'Llamarú', 'Lucerna'] },
+  { nombre: 'Torneo, ronda 2: Rosendo', ia: 'Torneo 2', provincia: 'Corrientes', nivel: 10, llega: 10, provs: ['Salta', 'Corrientes', 'Jujuy'], galpon: true, familias: ['Yacarón', 'Rayajá', 'Pajonero', 'Pirayú', 'Mburucoa', 'Tatakú'] },
+  { nombre: 'Torneo, ronda 3: Eulogia', ia: 'Torneo 3', provincia: 'Jujuy', nivel: 10, llega: 10, provs: ['Salta', 'Corrientes', 'Jujuy'], galpon: true, familias: ['Pariwana', 'Chinchay', 'Wiskacha', 'Mayuq', 'Allpuma', 'Quinti'] },
+];
