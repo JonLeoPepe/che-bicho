@@ -54,3 +54,51 @@ const T29 = readFileSync(new URL('catalogo-29.mjs', fuente), 'utf8').split('\n')
 writeFileSync(new URL('combate-arte.js', destino), `${cabecera}${base}\n${T29}\n${de60}\n${de61}\n
 export { O, H, CU, L, caravana, GL, MARCAS, EFECTOS, marcaSvg, efectoSvg, tag, tagM, tagE, vida, rombos, chip, panel, fondo, fichaRel, relevos, retrato, pie, msgT, flecha, revienta, tecnica, btn, icoCubre, icoRel, dorso, carta, carIco, reloj, bolea, tiros, icoBolea, icoRaja };\n`);
 console.log('Piezas de combate exportadas');
+
+// ---------- Mapas: las zonas aprobadas (lotes 18c, 19c y 20c) ----------
+// Se dibuja cada zona sin la gente, los bichos, el jugador, el fogón ni el HUD, y se anota dónde estaba cada cosa.
+const ZONAS = { salta: 'catalogo-50.mjs', corrientes: 'catalogo-53.mjs', jujuy: 'catalogo-56.mjs' };
+const mapas = {};
+for (const [prov, archivo] of Object.entries(ZONAS)) {
+  let txt = readFileSync(new URL(archivo, fuente), 'utf8');
+  const reemplazar = (re, nuevo) => { if (!re.test(txt)) throw new Error(`${archivo}: no encuentro ${re}`); txt = txt.replace(re, nuevo); };
+  reemplazar(/^const marco = .*$/m, "const __Z = {}; let __R = []; const marco = (id, cont) => { __Z[id] = { svg: cont, cosas: __R }; __R = []; return ''; };");
+  reemplazar(/^const pj = .*$/m, "const pj = (x, y) => { __R.push({ que: 'jugador', x, y }); return ''; };");
+  reemplazar(/^const gente = .*$/m, "const gente = (x, y, f, flip) => { __R.push({ que: 'gente', x, y, quien: f.name, flip: !!flip }); return ''; };");
+  reemplazar(/^const bicho = .*$/m, "const bicho = (x, y, f, s = .42, flip) => { __R.push({ que: 'bicho', x, y, quien: f.name, s, flip: !!flip }); return ''; };");
+  reemplazar(/^const ed = .*$/m, "const ed = (x, y, f, s = .7) => { __R.push({ que: 'edificio', x, y, s, quien: f.name || (String(f).match(/conMicro\\((\\w+)/) || [])[1] || 'otro' }); return `<g data-ed=\"${__R.length - 1}\" transform=\"translate(${x} ${y}) scale(${s})\">${f()}</g>`; };");
+  reemplazar(/^const pie = .*$/m, "const pie = '';");
+  txt = txt.replace(/\$\{hud\(/g, '${__hud(').replace(/\$\{fogon\(/g, '${__fogon(');
+  txt += "\nfunction __hud() { return ''; }\nfunction __fogon(x, y, s) { __R.push({ que: 'fogon', x, y, s }); return ''; }\nexport { __Z };\n";
+  const tmp = new URL(`_exportar-${archivo}`, fuente);
+  writeFileSync(tmp, txt);
+  try { mapas[prov] = (await import(tmp.href)).__Z; } finally { unlinkSync(tmp); }
+}
+// Medidas de cada edificio en pantalla, para que no se camine por encima (hace falta Chrome sin pantalla).
+try {
+  const { default: puppeteer } = await import('/home/claude/chebicho/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js');
+  const nav = await puppeteer.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+  const pag = await nav.newPage();
+  for (const zonas of Object.values(mapas)) for (const z of Object.values(zonas)) {
+    await pag.setContent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 760" width="360" height="760">${z.svg}</svg>`);
+    const cajas = await pag.evaluate(() => [...document.querySelectorAll('[data-ed]')].map((g) => { const r = g.getBoundingClientRect(); return [Number(g.dataset.ed), Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height)]; }));
+    for (const [i, x, y, w, h] of cajas) z.cosas[i].caja = [x, y, w, h];
+  }
+  await nav.close();
+} catch (e) { console.log('Sin medidas de edificios:', e.message); }
+writeFileSync(new URL('mapas.js', destino), `${cabecera}export const MAPAS = ${JSON.stringify(mapas)};\n`);
+console.log('Mapas exportados:', Object.entries(mapas).map(([p, z]) => `${p} ${Object.keys(z).length}`).join(', '));
+
+// ---------- Gente ----------
+const modsGente = ['personas-salta.mjs', 'personas-salta2.mjs', 'personas-salta3.mjs', 'personas-corrientes.mjs', 'personas-jujuy.mjs', 'personas-ermitanos.mjs', 'personas-tiendas.mjs'];
+const personas = {};
+for (const m of modsGente) {
+  const mod = await import(new URL(m, fuente).href);
+  for (const [k, f] of Object.entries(mod)) if (typeof f === 'function' && !['mano', 'bota', 'sombrero'].includes(k)) { try { const s = f(); if (typeof s === 'string' && s.length > 200) personas[k] = s; } catch { /* no es un dibujo */ } }
+}
+writeFileSync(new URL('personas.js', destino), `${cabecera}export const PERSONAS = ${JSON.stringify(personas)};\n`);
+console.log('Personas exportadas:', Object.keys(personas).length);
+
+// ---------- Edificios sueltos que el juego agrega (la feria de Salta, que no está en las zonas) ----------
+const { feria } = await import(new URL('edificios.mjs', fuente).href);
+writeFileSync(new URL('edificios.js', destino), `${cabecera}export const EDIFICIOS = ${JSON.stringify({ feria: feria() })};\n`);
